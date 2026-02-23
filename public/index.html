@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بازار لحظه‌ای ارز دیجیتال</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="badge">بازار زنده</p>
+          <h1>لیست لحظه‌ای قیمت ارزهای دیجیتال</h1>
+          <p class="subtitle">چیدمان جدولی مشابه پلتفرم‌های مانیتورینگ بازار با بروزرسانی ۱ ثانیه‌ای</p>
+        </div>
+        <div class="update-box">
+          <span>آخرین بروزرسانی</span>
+          <strong id="last-update">در حال دریافت...</strong>
+        </div>
+      </header>
+
+      <section class="stats" id="stats"></section>
+
+      <section class="table-panel">
+        <div class="table-scroll" dir="ltr">
+          <table class="coins-table">
+            <thead>
+              <tr>
+                <th class="star-col">☆</th>
+                <th>#</th>
+                <th class="name-col">نام</th>
+                <th>قیمت</th>
+                <th>۱ ساعت</th>
+                <th>۲۴ ساعت</th>
+                <th class="hide-md">۷ روز</th>
+                <th>ارزش بازار</th>
+                <th class="hide-lg">حجم (۲۴س)</th>
+                <th>عرضه در گردش</th>
+                <th class="hide-md">۷ روز اخیر</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr>
+                <td class="loading-cell" colspan="11">در حال دریافت قیمت‌ها...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
