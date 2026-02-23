@@ -1,263 +1,194 @@
-# Crypto Live Market (NestJS + Real-Time Engine)
+# CMC-Style Crypto Market Dashboard
 
-<p align="center">
-  داشبورد فارسی/RTL برای بازار کریپتو + موتور قیمت لحظه‌ای با Binance WebSocket و fallback خودکار CoinGecko
-</p>
+A production-ready, full-stack crypto market dashboard inspired by the **layout and data presentation style of CoinMarketCap**.
 
-<p align="center">
-  <img alt="Node" src="https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white">
-  <img alt="NestJS" src="https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white">
-  <img alt="WebSocket" src="https://img.shields.io/badge/Realtime-WebSocket-0A66C2">
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-black">
-</p>
+This project provides:
+- A responsive market table (rank, name, price, 24h change, market cap, 24h volume, mini trend)
+- Real-time symbol tracking through WebSocket
+- A backend with resilient multi-provider fallback when exchange APIs are geo-blocked or rate-limited
+- A clean, public-facing architecture suitable for portfolio/demo deployment
 
----
+## Highlights
 
-## چرا این پروژه؟
+- CMC-like market list UX and table structure
+- Real-time ticker updates for selected symbols
+- Smart symbol normalization (`BTC`, `BTCUSD`, `ETH/USD`, `tSOLUSD`)
+- API health visibility with provider status
+- Fallback chain for reliability without VPN:
+  - Bitfinex WebSocket (primary)
+  - CoinGecko (fallback #1)
+  - Binance (fallback #2)
+  - CoinLore (fallback #3)
 
-این پروژه برای سناریوهای واقعی مانیتورینگ قیمت کریپتو طراحی شده است:
-- UI فارسی و راست‌چین با چیدمان حرفه‌ای لیستی (الهام‌گرفته از نمایش‌های Market Board)
-- دریافت داده‌ی بازار عمومی از CoinPaprika برای نمایش لیست کامل کوین‌ها
-- موتور قیمت لحظه‌ای اختصاصی برای نمادهای کلیدی با **Binance WS**
-- fallback هوشمند روی **CoinGecko** برای مواقعی که Binance از برخی IPها در دسترس نیست
-- یک سرویس Singleton قابل استفاده برای چندین consumer بدون باز شدن چند اتصال WS
-
----
-
-## ویژگی‌های کلیدی
-
-- Real-time price feed با WebSocket ترکیبی Binance (بدون API Key)
-- Auto-Reconnect با backoff: `1s -> 2s -> 5s -> 10s -> 30s`
-- Ping/Pong handling برای پایداری اتصال
-- In-memory cache برای آخرین قیمت هر symbol
-- انتشار آپدیت‌ها با هر دو روش:
-  - `Observable` (`updates$`)
-  - `EventEmitter` (`price.update`)
-- Fallback خودکار به CoinGecko با polling هر `60s` + cache
-- Endpoint وضعیت برای مانیتورینگ اتصال، reconnect count و آخرین زمان آپدیت
-- تست ساده parser پیام WS و parser fallback
-
----
-
-## استک فنی
-
-- **Backend:** NestJS + TypeScript
-- **Realtime:** `ws`
-- **Reactive stream:** `rxjs`
-- **Frontend:** HTML/CSS/JS (RTL, Persian UI)
-
----
-
-## معماری (خلاصه)
+## Architecture
 
 ```mermaid
 flowchart LR
-  A[Client UI] --> B[/api/prices/]
-  A --> C[/api/market/latest/]
-  A --> D[/api/market/status/]
-
-  B --> E[CoinPaprika Service]
-  C --> F[MarketDataService Singleton]
-  D --> F
-
-  F --> G[Binance WebSocket Combined Stream]
-  F --> H[Binance REST Bootstrap]
-  F --> I[CoinGecko Fallback 60s]
+  A[Browser UI] -->|HTTP| B[Node.js Backend]
+  A -->|WebSocket /live| B
+  B -->|Primary stream| C[Bitfinex WSv2]
+  B -->|Fallback data| D[CoinGecko API]
+  B -->|Fallback data| E[Binance Public API]
+  B -->|Fallback data| F[CoinLore API]
 ```
 
----
+## Tech Stack
 
-## شروع سریع
+- **Frontend:** Vanilla JavaScript, semantic HTML, responsive CSS
+- **Backend:** Node.js + native HTTP server + `ws`
+- **Market Stream:** `bitfinex-api-node` (WSv2)
+- **Quality:** StandardJS linting
 
-### 1) نصب
+## Quick Start
+
+### 1) Prerequisites
+
+- Node.js `>= 18`
+- npm
+
+### 2) Install
 
 ```bash
 npm install
 ```
 
-### 2) اجرای توسعه
+### 3) Run
 
 ```bash
-npm run start:dev
+npm run start
 ```
 
-### 3) اجرای نسخه build
+Open:
 
-```bash
-npm run build
-npm start
+```text
+http://localhost:3000
 ```
 
-اپ پیش‌فرض روی `http://localhost:3000` اجرا می‌شود.
+## Environment Variables
 
----
-
-## اسکریپت‌ها
-
-- `npm run start:dev` اجرای توسعه با auto-reload
-- `npm run build` ساخت خروجی TypeScript در `dist`
-- `npm start` اجرای build
-- `npm test` build + اجرای تست‌ها (`node:test`)
-
----
+| Variable | Default | Description |
+|---|---:|---|
+| `PORT` | `3000` | HTTP/WebSocket server port |
+| `SYMBOL` | `tBTCUSD` | Initial tracked symbol |
+| `FALLBACK_POLL_MS` | `8000` | Poll interval for fallback providers when Bitfinex is unavailable |
 
 ## API Reference
 
-### Market Board (CoinPaprika)
+### `GET /api/health`
+Returns service and provider status.
 
-#### `GET /api/prices`
-لیست کوین‌های برتر (پیش‌فرض 24 مورد) برای جدول اصلی UI.
-
----
-
-### Real-Time Engine (Binance + Fallback)
-
-#### `GET /api/market/latest`
-آخرین قیمت cache‌شده برای symbolهای پیکربندی‌شده.
-
-نمونه پاسخ:
+Example response:
 
 ```json
-[
-  {
-    "symbol": "btcusdt",
-    "price": 64617,
-    "updatedAt": "2026-02-23T19:20:57.943Z",
-    "source": "coingecko_fallback"
+{
+  "ok": true,
+  "provider": "coingecko",
+  "fallbackProvider": "coingecko",
+  "symbols": ["tBTCUSD"],
+  "wsConnected": false,
+  "hasTicker": true,
+  "fallbackError": null,
+  "lastError": "Unexpected server response: 403"
+}
+```
+
+### `GET /api/prices?q=<query>&limit=<n>`
+Returns searchable market list rows used by the table.
+
+Fields include:
+- `symbol`
+- `base`
+- `name`
+- `price`
+- `change24h`
+- `marketCap`
+- `volume24h`
+
+## WebSocket Protocol (`/live`)
+
+### Client -> Server
+
+```json
+{ "type": "set-symbol", "symbol": "ETH/USD" }
+```
+
+### Server -> Client
+
+`status` message:
+
+```json
+{
+  "type": "status",
+  "data": {
+    "connectedToBitfinex": false,
+    "provider": "coinlore",
+    "symbol": "tETHUSD",
+    "error": null
   }
-]
+}
 ```
 
-#### `GET /api/market/latest/:symbol`
-آخرین قیمت یک symbol خاص. (مثال: `/api/market/latest/btcusdt`)
+`ticker` message:
 
-#### `GET /api/market/latest?symbols=btcusdt,ethusdt`
-فیلتر چند symbol با query string.
-
-#### `GET /api/market/status`
-وضعیت موتور real-time:
-- `connected`
-- `fallbackActive`
-- `reconnectCount`
-- `reconnectAttempt`
-- `trackedSymbols`
-- `lastPriceUpdateAt`
-
----
-
-## ماژول قیمت لحظه‌ای
-
-### فایل‌های مهم
-
-- `src/market-data/market-data.service.ts`
-- `src/market-data/binance-parser.ts`
-- `src/market-data/coingecko-fallback.ts`
-- `src/market-data/symbol-map.ts`
-
-### رفتار اتصال
-
-- اتصال اصلی:
-  - `wss://stream.binance.com:9443/stream?streams=<symbol>@trade/...`
-- subscribe اضافی ارسال نمی‌شود (stream URL یک‌بار ساخته می‌شود)
-- چون combined stream استفاده شده، عملاً پیام‌های اضافی client-to-server به حداقل می‌رسد
-- reconnect خودکار با backoff افزایشی
-
-### سیاست fallback
-
-در خطاهای رایج Binance مثل:
-- `ECONNRESET`
-- `403`
-- `timeout`
-- `fetch failed`
-
-سرویس به شکل خودکار به CoinGecko سوئیچ می‌کند:
-
-`https://api.coingecko.com/api/v3/simple/price?ids=<ids>&vs_currencies=usd`
-
-Polling fallback روی `60s` تنظیم شده تا ریسک rate-limit کاهش پیدا کند.
-
----
-
-## افزودن Symbol جدید
-
-فقط فایل زیر را ویرایش کنید:
-
-`src/market-data/symbol-map.ts`
-
-نمونه:
-
-```ts
-export const MARKET_SYMBOLS = [
-  { binanceSymbol: 'btcusdt', coinGeckoId: 'bitcoin' },
-  { binanceSymbol: 'ethusdt', coinGeckoId: 'ethereum' },
-  { binanceSymbol: 'bnbusdt', coinGeckoId: 'binancecoin' },
-  { binanceSymbol: 'xrpusdt', coinGeckoId: 'ripple' }
-];
+```json
+{
+  "type": "ticker",
+  "data": {
+    "symbol": "tETHUSD",
+    "lastPrice": 1864.25,
+    "dailyChangePerc": -0.0395,
+    "volume": 19951623685.17,
+    "at": 1771872000000
+  }
+}
 ```
 
-نکته مهم:
-- `binanceSymbol` باید lowercase باشد.
-- `coinGeckoId` باید معادل دقیق CoinGecko باشد.
+## Project Structure
 
----
-
-## استفاده برنامه‌نویسی (Service API)
-
-`MarketDataService` در Nest به‌صورت Singleton ثبت شده و برای چند consumer مشترک است.
-
-متدهای اصلی:
-- `getLatestPrice(symbol)`
-- `getLatestPrices(symbols?)`
-- `updates$` (Observable)
-- `eventEmitter` با event `price.update`
-
----
-
-## تست‌ها
-
-فایل تست‌ها:
-- `test/binance-parser.test.js`
-- `test/coingecko-fallback.test.js`
-
-موارد پوشش‌داده‌شده:
-- parse صحیح پیام trade در combined stream
-- نادیده گرفتن eventهای نامعتبر
-- ساخت صحیح URL fallback
-- parse صحیح پاسخ CoinGecko
-
-اجرا:
-
-```bash
-npm test
+```text
+.
+├── backend/
+│   └── server.js          # HTTP + WebSocket gateway, stream/fallback orchestration
+├── front/
+│   ├── index.html         # CMC-style layout shell
+│   ├── styles.css         # responsive table-driven UI
+│   └── app.js             # rendering, search, symbol tracking, WS wiring
+├── lib/                   # core Bitfinex transport logic
+├── examples/              # Bitfinex API usage examples
+└── README.md
 ```
 
----
+## NPM Scripts
 
-## لاگ و مانیتورینگ
+- `npm run start` -> start backend + frontend
+- `npm run lint` -> run StandardJS
+- `npm test` -> lint + unit/integration tests from base library
 
-لاگ‌های runtime برای رویدادهای کلیدی ثبت می‌شوند:
-- connect / disconnect
-- reconnect schedule
-- fallback activation
-- fallback update success/failure
+## Why This Design
 
-برای health check سریع:
+The repository is optimized for **public demo reliability**:
+- If direct exchange stream access is blocked, users still see searchable prices.
+- The UI keeps the familiar market-table mental model used by top crypto data products.
+- Real-time symbol focus and market overview coexist in a single page.
 
-```bash
-curl http://localhost:3000/api/market/status
-```
+## Deployment Notes
 
----
+- Deploy behind HTTPS in production (WebSocket auto-upgrades to `wss` in browser).
+- If you hit provider rate limits, increase `FALLBACK_POLL_MS`.
+- For enterprise use, replace free fallback APIs with paid provider keys.
 
-## انتشار عمومی (GitHub Ready)
+## Roadmap
 
-برای پابلیک‌کردن ریپو پیشنهاد می‌شود:
-- فایل `LICENSE` (MIT) اضافه شود
-- یک screenshot یا GIF از UI در README قرار بگیرد
-- Topics مناسب روی GitHub ست شود: `nestjs`, `crypto`, `websocket`, `rtl`, `persian-ui`
+- Real historical sparkline data per row (instead of generated mini trend)
+- Sorting and pagination controls
+- Favorites/watchlist persistence
+- Multi-fiat quote support (USD/EUR/TRY)
 
----
+## Disclaimer
+
+This project is for educational/demo purposes and is **not financial advice**.
+Always verify market data through your preferred official sources before trading.
 
 ## License
 
-MIT (پیشنهادی)
+MIT

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Market List</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div>
+        <h1>Today's Cryptocurrency Prices</h1>
+        <p id="status" class="status">Connecting...</p>
+      </div>
+      <div class="actions">
+        <button id="health-btn" class="health-btn" type="button">Check API</button>
+      </div>
+    </header>
+
+    <section class="selected">
+      <div class="selected-main">
+        <p class="label">Selected</p>
+        <h2 id="selected-name">-</h2>
+        <p id="selected-symbol" class="selected-symbol">-</p>
+      </div>
+      <div class="selected-price-wrap">
+        <p id="selected-price" class="selected-price">-</p>
+        <p id="selected-change" class="selected-change">-</p>
+      </div>
+      <div class="selected-meta">
+        <p>24h Volume: <strong id="selected-volume">-</strong></p>
+        <p>Updated: <strong id="selected-updated">-</strong></p>
+      </div>
+    </section>
+
+    <section class="list-card">
+      <div class="list-head">
+        <form id="search-form" class="search" autocomplete="off">
+          <input
+            id="symbol-input"
+            name="symbol"
+            type="text"
+            placeholder="Search coin (BTC, ETH, Solana...)"
+          >
+          <button type="submit">Track</button>
+        </form>
+        <p id="api-health" class="api-health">API status: unknown</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>24h %</th>
+              <th>Market Cap</th>
+              <th>Volume (24h)</th>
+              <th>Last 7D</th>
+            </tr>
+          </thead>
+          <tbody id="prices-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{
+  "name": "bitfinex-api-node",
+  "version": "8.0.0",
+  "description": "Node reference library for Bitfinex API",
+  "engines": {
+    "node": ">=18.0"
+  },
+  "main": "index.js",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
+  },
+  "scripts": {
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "test": "npm run lint && npm run unit",
+    "unit": "NODE_ENV=test mocha -b --recursive",
+    "docs": "rm -rf docs && node_modules/.bin/jsdoc --configure .jsdoc.json --verbose",
+    "prepare": "husky install",
+    "start": "node backend/server.js",
+    "front:start": "npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitfinexcom/bitfinex-api-node.git"
+  },
+  "keywords": [
+    "bitfinex",
+    "bitcoin",
+    "BTC"
+  ],
+  "contributors": [
+    "Ezequiel Wernicke <ezequiel.wernicke@bitfinex.com> (https://www.bitfinex.com)",
+    "Josh Rossi <josh@bitfinex.com> (https://www.bitfinex.com)",
+    "Cris Mihalache <cris.m@bitfinex.com> (https://www.bitfinex.com)",
+    "Robert Kowalski <robert@bitfinex.com> (https://www.bitfinex.com)",
+    "Simone Poggi <simone@bitfinex.com> (https://www.bitfinex.com)",
+    "Paolo Ardoino <paolo@bitfinex.com> (https://www.bitfinex.com)",
+    "Abhishek Shrestha <abhishek.shrestha@bitfinex.com> (https://www.bitfinex.com)"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bitfinexcom/bitfinex-api-node/issues"
+  },
+  "homepage": "http://bitfinexcom.github.io/bitfinex-api-node/",
+  "devDependencies": {
+    "bfx-api-mock-srv": "^2.0.0",
+    "blessed": "0.1.81",
+    "blessed-contrib": "^1.0.11",
+    "cli-table3": "^0.6.5",
+    "docdash": "^2.0.2",
+    "dotenv": "^16.4.5",
+    "husky": "^9.1.6",
+    "jsdoc-to-markdown": "^9.0.1",
+    "mocha": "^10.7.3",
+    "p-iteration": "1.1.8",
+    "readline-promise": "1.0.4",
+    "socks-proxy-agent": "^8.0.4",
+    "standard": "^17.1.2"
+  },
+  "dependencies": {
+    "bfx-api-node-models": "^2.0.0",
+    "bfx-api-node-rest": "^7.0.0",
+    "bfx-api-node-util": "^1.0.12",
+    "bfx-api-node-ws1": "^1.0.0",
+    "bignumber.js": "9.0.0",
+    "bitfinex-api-node": "^8.0.0",
+    "cbq": "0.0.1",
+    "debug": "4.3.3",
+    "lodash": "^4.17.4",
+    "lodash.throttle": "4.1.1",
+    "lossless-json": "1.0.3",
+    "promise-throttle": "1.0.1",
+    "ws": "7.5.10"
+  },
+  "standard": {
+    "ignore": [
+      "/docs/**/*.js"
+    ]
+  }
+}
